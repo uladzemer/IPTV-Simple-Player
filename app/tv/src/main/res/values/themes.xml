@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Тема окна до появления Compose: тёмный фон как у плеера, без заголовка и анимаций перехода. -->
+    <style name="Theme.SimpleTv" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/tv_window_background</item>
+        <item name="android:colorBackground">@color/tv_window_background</item>
+        <item name="android:windowActivityTransitions">false</item>
+    </style>
+</resources>

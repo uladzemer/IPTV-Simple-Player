@@ -1,0 +1,35 @@
+# Результаты сборки и кеши Gradle/Kotlin
+build/
+.gradle/
+.kotlin/
+.externalNativeBuild/
+.cxx/
+
+# Настройки конкретной машины и среды разработки
+local.properties
+.idea/
+*.iml
+captures/
+.DS_Store
+
+# Ключи подписи и их параметры в репозиторий не попадают
+*.jks
+*.keystore
+jks.txt
+
+# Личные файлы владельца рядом с проектом: ссылка на плейлист и готовые APK
+playlist.txt
+*.apk
+
+# Локальные инструкции для ИИ-помощников — только на машине владельца
+AGENTS.md
+CLAUDE.md
+
+# На будущее: другие форматы ключей, сборки для магазина, локальные секреты и журналы
+*.p12
+*.aab
+.env
+*.log
+keystore.properties
+signing.properties
+*-release.properties

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Резервная копия для Android 8–11: только настройки плеера и база плейлистов с избранным (вместе с журналом WAL). -->
+<full-backup-content>
+    <include domain="file" path="datastore/tv_settings.preferences_pb" />
+    <include domain="database" path="." />
+</full-backup-content>

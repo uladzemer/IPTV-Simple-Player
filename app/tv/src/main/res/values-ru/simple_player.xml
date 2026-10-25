@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Подсказки поверх эфира -->
+    <string name="tv_simple_hint_zap">▲ ▼  Каналы</string>
+    <string name="tv_simple_hint_groups">◀  Группы</string>
+    <string name="tv_simple_hint_favorite">▶  Меню</string>
+    <string name="tv_simple_menu_favorite_add">Добавить в избранное</string>
+    <string name="tv_simple_menu_favorite_remove">Убрать из избранного</string>
+    <string name="tv_simple_menu_restart">Перезапустить канал</string>
+    <string name="tv_simple_menu_channels">Список каналов</string>
+    <string name="tv_simple_favorite_added">Добавлено в избранное</string>
+    <string name="tv_simple_favorite_removed">Убрано из избранного</string>
+    <string name="tv_simple_back_again">Нажмите «Назад» ещё раз, чтобы открыть настройки</string>
+    <string name="tv_simple_no_signal">Нет сигнала. Пробую снова…</string>
+    <string name="tv_simple_loading">Загрузка…</string>
+    <string name="tv_simple_recovering">Канал завис, перезапускаю…</string>
+    <string name="tv_simple_paused">Пауза</string>
+    <string name="tv_simple_group_favorites">Избранное</string>
+    <string name="tv_simple_group_all">Все каналы</string>
+    <string name="tv_simple_group_uncategorized">Другое</string>
+    <string name="tv_simple_panel_groups">Группы</string>
+    <string name="tv_simple_panel_playlists">Плейлисты</string>
+    <string name="tv_simple_panel_empty">Нет каналов</string>
+
+    <!-- Экран настроек -->
+    <string name="tv_simple_settings_title">Настройки</string>
+    <string name="tv_simple_watch_now">Смотреть ТВ</string>
+    <string name="tv_settings_section_watch">Просмотр</string>
+    <string name="tv_settings_section_source">Источник каналов</string>
+    <string name="tv_simple_startup_title">Канал при запуске</string>
+    <string name="tv_simple_startup_off">Показать настройки</string>
+    <string name="tv_simple_startup_last">Последний канал</string>
+    <string name="tv_simple_startup_favorite">Первый из избранного</string>
+    <string name="tv_simple_startup_number">Канал по номеру</string>
+    <string name="tv_simple_startup_number_value">Канал № %1$d</string>
+    <string name="tv_settings_number_title">Номер канала</string>
+    <string name="tv_settings_number_hint">◀ ▶ — уменьшить или увеличить</string>
+    <string name="tv_simple_zapping_title">Кнопка «вверх»</string>
+    <string name="tv_simple_zapping_next">Следующий канал</string>
+    <string name="tv_simple_zapping_previous">Предыдущий канал</string>
+    <string name="tv_simple_boot_title">Запуск при включении приставки</string>
+    <string name="tv_simple_on">Вкл.</string>
+    <string name="tv_simple_off">Выкл.</string>
+    <string name="tv_settings_boot_needs_permission">Нужно разрешение</string>
+    <string name="tv_simple_boot_permission_manual">Разрешите приложению «Поверх других окон» в системных настройках или выполните: adb shell appops set %1$s SYSTEM_ALERT_WINDOW allow</string>
+    <string name="tv_settings_playlists_title">Плейлисты</string>
+    <string name="tv_settings_playlists_value">Каналов: %1$d</string>
+    <string name="tv_settings_playlists_none">Не добавлен</string>
+    <string name="tv_simple_playlist_title">Добавить плейлист M3U</string>
+    <string name="tv_simple_playlist_hint">Ссылка на плейлист (http://…)</string>
+    <string name="tv_simple_playlist_add">Добавить</string>
+    <string name="tv_simple_playlist_adding">Загружаю плейлист…</string>
+    <string name="tv_simple_playlist_added">Плейлист добавлен</string>
+    <string name="tv_settings_playlists_refreshed">Плейлисты обновлены</string>
+    <string name="tv_simple_playlist_failed">Не удалось загрузить плейлист</string>
+    <string name="tv_simple_playlist_invalid">Введите ссылку, начинающуюся с http:// или https://</string>
+    <string name="tv_simple_about_refresh">Обновить плейлисты</string>
+    <string name="tv_settings_quit">Выйти из приложения</string>
+    <string name="tv_settings_footer">%1$s · версия %2$s · в избранном: %3$d</string>
+</resources>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Подсказки поверх эфира -->
+    <string name="tv_simple_hint_zap">▲ ▼  Channels</string>
+    <string name="tv_simple_hint_groups">◀  Groups</string>
+    <string name="tv_simple_hint_favorite">▶  Menu</string>
+    <string name="tv_simple_menu_favorite_add">Add to favorites</string>
+    <string name="tv_simple_menu_favorite_remove">Remove from favorites</string>
+    <string name="tv_simple_menu_restart">Restart channel</string>
+    <string name="tv_simple_menu_channels">Channel list</string>
+    <string name="tv_simple_favorite_added">Added to favorites</string>
+    <string name="tv_simple_favorite_removed">Removed from favorites</string>
+    <string name="tv_simple_back_again">Press Back again to open settings</string>
+    <string name="tv_simple_no_signal">No signal. Retrying…</string>
+    <string name="tv_simple_loading">Loading…</string>
+    <string name="tv_simple_recovering">Channel stalled, restarting…</string>
+    <string name="tv_simple_paused">Paused</string>
+    <string name="tv_simple_group_favorites">Favorites</string>
+    <string name="tv_simple_group_all">All channels</string>
+    <string name="tv_simple_group_uncategorized">Other</string>
+    <string name="tv_simple_panel_groups">Groups</string>
+    <string name="tv_simple_panel_playlists">Playlists</string>
+    <string name="tv_simple_panel_empty">No channels</string>
+
+    <!-- Экран настроек -->
+    <string name="tv_simple_settings_title">Settings</string>
+    <string name="tv_simple_watch_now">Watch TV</string>
+    <string name="tv_settings_section_watch">Viewing</string>
+    <string name="tv_settings_section_source">Channel source</string>
+    <string name="tv_simple_startup_title">Channel on launch</string>
+    <string name="tv_simple_startup_off">Show settings</string>
+    <string name="tv_simple_startup_last">Last watched channel</string>
+    <string name="tv_simple_startup_favorite">First favorite channel</string>
+    <string name="tv_simple_startup_number">Channel by number</string>
+    <string name="tv_simple_startup_number_value">Channel № %1$d</string>
+    <string name="tv_settings_number_title">Channel number</string>
+    <string name="tv_settings_number_hint">◀ ▶ — decrease or increase</string>
+    <string name="tv_simple_zapping_title">Up button</string>
+    <string name="tv_simple_zapping_next">Next channel</string>
+    <string name="tv_simple_zapping_previous">Previous channel</string>
+    <string name="tv_simple_boot_title">Start when the box is switched on</string>
+    <string name="tv_simple_on">On</string>
+    <string name="tv_simple_off">Off</string>
+    <string name="tv_settings_boot_needs_permission">Permission needed</string>
+    <string name="tv_simple_boot_permission_manual">Allow “Display over other apps” for this app in the system settings, or run: adb shell appops set %1$s SYSTEM_ALERT_WINDOW allow</string>
+    <string name="tv_settings_playlists_title">Playlists</string>
+    <string name="tv_settings_playlists_value">Channels: %1$d</string>
+    <string name="tv_settings_playlists_none">Not added</string>
+    <string name="tv_simple_playlist_title">Add M3U playlist</string>
+    <string name="tv_simple_playlist_hint">Playlist link (http://…)</string>
+    <string name="tv_simple_playlist_add">Add</string>
+    <string name="tv_simple_playlist_adding">Loading playlist…</string>
+    <string name="tv_simple_playlist_added">Playlist added</string>
+    <string name="tv_settings_playlists_refreshed">Playlists refreshed</string>
+    <string name="tv_simple_playlist_failed">Could not load the playlist</string>
+    <string name="tv_simple_playlist_invalid">Enter a link that starts with http:// or https://</string>
+    <string name="tv_simple_about_refresh">Refresh playlists</string>
+    <string name="tv_settings_quit">Close the app</string>
+    <string name="tv_settings_footer">%1$s · version %2$s · favorites: %3$d</string>
+</resources>

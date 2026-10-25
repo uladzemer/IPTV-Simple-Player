@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Совпадает с TvColors.Background, чтобы при запуске не мелькал другой цвет. -->
+    <color name="tv_window_background">#FF111316</color>
+</resources>
