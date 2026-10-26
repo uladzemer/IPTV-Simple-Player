@@ -9,6 +9,7 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
@@ -19,6 +20,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.Renderer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.audio.AudioCapabilities
+import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.hls.DefaultHlsExtractorFactory
@@ -399,6 +401,10 @@ class TvPlayerEngine @Inject constructor(
      * американских каналов (MPEG-2 + AC3) шло замедленно; к тому же громкость
      * приложения на неё не действует, а HDMI переключается между форматами
      * при каждой смене канала.
+     *
+     * AC3 и E-AC3 (Dolby) декодирует только FFmpeg. На приставках без лицензии
+     * Dolby встроенный декодер есть, но вместо звука выдаёт тишину (Model-X3:
+     * «DD+ DCV decoder disable» в журнале) — каналы шли без звука.
      */
     private fun buildRenderers(): DefaultRenderersFactory =
         object : NextRenderersFactory(context) {
@@ -424,6 +430,28 @@ class TvPlayerEngine @Inject constructor(
                 )
             }
 
+            override fun buildAudioRenderers(
+                context: Context,
+                extensionRendererMode: Int,
+                mediaCodecSelector: MediaCodecSelector,
+                enableDecoderFallback: Boolean,
+                audioSink: AudioSink,
+                eventHandler: Handler,
+                eventListener: AudioRendererEventListener,
+                out: ArrayList<Renderer>,
+            ) {
+                super.buildAudioRenderers(
+                    context,
+                    extensionRendererMode,
+                    withoutDeviceDolby(mediaCodecSelector),
+                    enableDecoderFallback,
+                    audioSink,
+                    eventHandler,
+                    eventListener,
+                    out,
+                )
+            }
+
             override fun buildAudioSink(
                 context: Context,
                 enableFloatOutput: Boolean,
@@ -440,12 +468,25 @@ class TvPlayerEngine @Inject constructor(
             setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         }
 
+    /** Встроенным декодерам Dolby не доверяем: без лицензии они выдают тишину. */
+    private fun withoutDeviceDolby(selector: MediaCodecSelector) =
+        MediaCodecSelector { mimeType, requiresSecureDecoder, requiresTunnelingDecoder ->
+            if (mimeType in DOLBY_AUDIO) {
+                emptyList()
+            } else {
+                selector.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder)
+            }
+        }
+
     private fun onMain(action: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) action() else mainHandler.post(action)
     }
 
     private companion object {
         const val TAG = "TvPlayer"
+
+        /** Звук Dolby: его декодирует FFmpeg, а не приставка. */
+        val DOLBY_AUDIO = setOf(MimeTypes.AUDIO_AC3, MimeTypes.AUDIO_E_AC3, MimeTypes.AUDIO_E_AC3_JOC)
         const val NET_TAG = "TvNet"
 
         /** Повторов на каждый кусок: с короткими таймаутами лучше больше попыток. */

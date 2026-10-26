@@ -1,0 +1,1 @@
+• Sound on Dolby (AC3 / E-AC3) channels on boxes without a Dolby license: the audio is now decoded by the bundled FFmpeg instead of the box decoder, which returned silence.
