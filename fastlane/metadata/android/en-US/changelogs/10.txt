@@ -1,0 +1,1 @@
+• The interface looks the same on every TV box: it is laid out on a 1280×720 canvas and scaled to the screen. On boxes with a non-standard screen density the side panels no longer squeeze the channel list.
