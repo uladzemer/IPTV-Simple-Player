@@ -21,10 +21,11 @@ fun asJavaStringLiteral(value: String): String =
 // - в CI он приходит из секретов через переменные окружения RELEASE_*;
 // - локально путь к файлу с параметрами задаётся в ~/.gradle/gradle.properties:
 //   iptvSimpleSigningProps=/путь/к/iptvsimple-release.properties
-// Без ключа релиз подписывается отладочным ключом, и такой APK не встанет поверх
-// установленного с постоянным ключом.
+// Без ключа релиз получается неподписанным: так его собирает и подписывает
+// своим ключом F-Droid. Для проверки на приставке без ключа — debug-сборка.
 val releaseSigningProps = Properties().apply {
     providers.gradleProperty("iptvSimpleSigningProps").orNull
+        ?.takeIf { it.isNotBlank() }
         ?.let(::file)
         ?.takeIf { it.isFile }
         ?.inputStream()
@@ -36,7 +37,7 @@ val releaseStoreFile = releaseSigningValue("RELEASE_KEYSTORE_FILE", "storeFile")
 
 // Версия для зрителя; она же входит в имя готового файла:
 // app/tv/build/outputs/apk/release/tv-<версия>-release.apk
-val appVersionName = "1.3.2"
+val appVersionName = "1.3.3"
 base.archivesName = "tv-$appVersionName"
 
 android {
@@ -47,7 +48,7 @@ android {
         applicationId = "ru.iptvsimple.tv"
         minSdk = 26
         targetSdk = 33
-        versionCode = 7
+        versionCode = 8
         versionName = appVersionName
         buildConfigField("String", "TV_DEFAULT_PLAYLIST_URL", asJavaStringLiteral(tvDefaultPlaylistUrl.get()))
         // Приставки — только ARM; библиотеки FFmpeg для x86 лишь раздувают APK.
@@ -75,7 +76,6 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
-                ?: signingConfigs.getByName("debug")
         }
     }
 
@@ -92,6 +92,13 @@ android {
     androidResources {
         // В APK только английский (запасной) и русский; переводы библиотек отбрасываются.
         localeFilters += listOf("en", "ru")
+    }
+
+    dependenciesInfo {
+        // Зашифрованный список зависимостей для Google Play в APK не кладём:
+        // F-Droid и RuStore его не используют, а F-Droid требует его убрать.
+        includeInApk = false
+        includeInBundle = false
     }
 
     packaging {

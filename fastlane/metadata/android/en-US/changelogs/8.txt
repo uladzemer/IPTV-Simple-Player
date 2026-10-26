@@ -1,0 +1,3 @@
+• Builds for F-Droid and RuStore: unsigned release without a signing key, no Google dependency metadata in the APK.
+• 1.3.2: start on power-on is opt-in; boxes updated from older versions keep it on.
+• 1.3.1: the channel starts as soon as the network comes up after boot.

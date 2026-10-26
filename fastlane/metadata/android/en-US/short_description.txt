@@ -1,0 +1,1 @@
+Minimal IPTV player for Android TV boxes: remote only, hardware decoding.

@@ -1,0 +1,25 @@
+Categories:
+  - Multimedia
+License: GPL-3.0-only
+AuthorName: uladzemer
+SourceCode: https://github.com/uladzemer/IPTV-Simple-Player
+IssueTracker: https://github.com/uladzemer/IPTV-Simple-Player/issues
+Changelog: https://github.com/uladzemer/IPTV-Simple-Player/releases
+
+AutoName: Simple TV
+
+RepoType: git
+Repo: https://github.com/uladzemer/IPTV-Simple-Player.git
+
+Builds:
+  - versionName: 1.3.3
+    versionCode: 8
+    commit: v1.3.3
+    subdir: app/tv
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.3.3
+CurrentVersionCode: 8

@@ -115,7 +115,7 @@ No EPG, no Xtream Codes, no VOD/movies/series, no RTMP/RTSP/DASH, no DRM, no pho
 ./gradlew :app:tv:assembleRelease                                 # релизная сборка
 ```
 
-Готовый файл: `app/tv/build/outputs/apk/release/tv-<версия>-release.apk`. Ключ подписи в репозитории не хранится: путь к файлу с его параметрами передаётся свойством `iptvSimpleSigningProps` или переменными окружения `RELEASE_*`. Без ключа релизная сборка подписывается отладочным ключом и не встанет поверх установленной версии.
+Готовый файл: `app/tv/build/outputs/apk/release/tv-<версия>-release.apk`. Ключ подписи в репозитории не хранится: путь к файлу с его параметрами передаётся свойством `iptvSimpleSigningProps` или переменными окружения `RELEASE_*`. Без ключа релизная сборка получается неподписанной — так её собирает F-Droid; для проверки на своей приставке без ключа есть отладочная сборка.
 
 GitHub Actions (`.github/workflows/tv-simple.yml`) запускает тесты и собирает подписанный APK при каждом изменении ветки `master` (кроме правок только в `.md`) и по ручному запуску. Нужны секреты репозитория `RELEASE_KEYSTORE_BASE64`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`.
 

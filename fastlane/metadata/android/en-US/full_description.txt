@@ -1,0 +1,21 @@
+Simple TV is an IPTV player for Android TV boxes, made for viewers who do not want menus at all — elderly parents, a kitchen TV, a waiting room.
+
+<b>The app does not contain any channels.</b> You add your own M3U / M3U8 playlist link from your IPTV provider.
+
+<b>What it does</b>
+<ul>
+<li>Plays a channel full screen right after launch. Optionally starts by itself when the box is switched on (off by default, one switch in Settings).</li>
+<li>Remote control only: ▲/▼ switch channels, ◀ opens groups and the channel list, ▶ opens the channel menu, digits jump to a channel number, Back twice opens Settings.</li>
+<li>Permanent channel numbers: a number is the channel's place in the playlist.</li>
+<li>Hardware video decoding (H.264, HEVC, MPEG-2, 4K UHD where the chip supports it).</li>
+<li>Audio (AC3, E-AC3, AAC, MP2) is always decoded to PCM, so playback speed is exact and the app volume works on every channel. MP2 is decoded by the bundled FFmpeg.</li>
+<li>Stable live streams: 40 s behind live, stall watchdog with soft resume, fast reconnect when the network comes up.</li>
+<li>Large, readable dark interface in English and Russian.</li>
+<li>Favorites, groups, daily playlist refresh.</li>
+</ul>
+
+<b>Privacy</b>: no ads, no analytics, no accounts. The app connects only to your playlist and the stream and logo addresses inside it.
+
+Deliberately not included: EPG, Xtream Codes, VOD, DRM, phone UI.
+
+Written from scratch in Kotlin with Jetpack Compose for TV and AndroidX Media3. Tested on Amlogic TV boxes (S905X5 Android 11, Android 9 32-bit). Free software under GPL-3.0.
