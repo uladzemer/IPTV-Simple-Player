@@ -37,7 +37,8 @@ apk:
     - ./gradlew --no-daemon :engine:testDebugUnitTest :app:tv:testDebugUnitTest
     - ./gradlew --no-daemon :app:tv:assembleRelease
     # Без FFmpeg часть каналов останется без звука (MP2, AC3), поэтому проверяем его наличие.
-    - unzip -l app/tv/build/outputs/apk/release/tv-*-release-unsigned.apk | grep -q 'lib/arm64-v8a/libavcodec.so'
+    # grep без -q читает список до конца: иначе unzip получает обрыв канала (код 141).
+    - unzip -l app/tv/build/outputs/apk/release/tv-*-release-unsigned.apk | grep 'lib/arm64-v8a/libavcodec.so' >/dev/null
     # Для метки версии: наша сборка должна совпасть с подписанным APK из релиза.
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
