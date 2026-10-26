@@ -43,7 +43,7 @@ apk:
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
         VERSION="${CI_COMMIT_TAG#v}"
-        wget -q "https://github.com/uladzemer/IPTV-Simple-Player/releases/download/$CI_COMMIT_TAG/SimpleTV-$VERSION.apk" -O signed.apk
+        wget -q "https://github.com/uladzemer/SimpleTV/releases/download/$CI_COMMIT_TAG/SimpleTV-$VERSION.apk" -O signed.apk
         pip3 install -q --break-system-packages apksigcopier
         export PATH="$ANDROID_HOME/build-tools/37.0.0:$PATH"
         apksigcopier compare signed.apk --unsigned "app/tv/build/outputs/apk/release/tv-$VERSION-release-unsigned.apk"

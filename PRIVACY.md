@@ -10,7 +10,7 @@
 - The app does not contain any TV channels or video content. You are responsible for using playlists you have the right to watch.
 - Permissions: Internet and network state (to load playlists and streams), start after boot and “Display over other apps” (only if you turn on *Start when the box is switched on*), wake lock (to keep the screen on while a channel plays).
 
-Contact: https://github.com/uladzemer/IPTV-Simple-Player/issues
+Contact: https://github.com/uladzemer/SimpleTV/issues
 
 ## Русский
 
@@ -20,4 +20,4 @@ Contact: https://github.com/uladzemer/IPTV-Simple-Player/issues
 - Приложение не содержит телеканалов и видео. Вы сами отвечаете за то, чтобы смотреть плейлисты, на которые у вас есть права.
 - Разрешения: интернет и состояние сети (загрузка плейлистов и потоков), запуск после загрузки и «Показ поверх других окон» (только если вы включили «Запуск при включении приставки»), удержание экрана включённым во время просмотра.
 
-Связь: https://github.com/uladzemer/IPTV-Simple-Player/issues
+Связь: https://github.com/uladzemer/SimpleTV/issues

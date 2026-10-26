@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/uladzemer/IPTV-Simple-Player/releases/latest"><b>⬇ Download APK · Скачать APK</b></a>
+  <a href="https://github.com/uladzemer/SimpleTV/releases/latest"><b>⬇ Download APK · Скачать APK</b></a>
   &nbsp;·&nbsp; <a href="#english">English</a>
   &nbsp;·&nbsp; <a href="#русский">Русский</a>
   &nbsp;·&nbsp; <a href="#screenshots--скриншоты">Screenshots</a>
@@ -18,8 +18,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/uladzemer/IPTV-Simple-Player">GitHub</a>
-  &nbsp;·&nbsp; <a href="https://gitlab.com/uladzemer/IPTV-Simple-Player">GitLab (mirror · зеркало)</a>
+  <a href="https://github.com/uladzemer/SimpleTV">GitHub</a>
+  &nbsp;·&nbsp; <a href="https://gitlab.com/uladzemer/SimpleTV">GitLab (mirror · зеркало)</a>
 </p>
 
 ![On air: HGTV with the channel bar](docs/screenshots/01-on-air.jpg)
@@ -45,7 +45,7 @@ Simple TV is **written from scratch** in Kotlin with Jetpack Compose for TV and 
 
 ### Quick start
 
-1. Download the APK from [Releases](https://github.com/uladzemer/IPTV-Simple-Player/releases/latest) and install it on the TV box (Android 8.0+, ARM).
+1. Download the APK from [Releases](https://github.com/uladzemer/SimpleTV/releases/latest) and install it on the TV box (Android 8.0+, ARM).
 2. Open Simple TV. With no playlist yet, Settings open automatically.
 3. Enter your M3U / M3U8 playlist link (`http://` or `https://`) and press **Add**.
 4. Check **Channel on launch** (default: last watched channel) and turn on **Start when the box is switched on** if the channel should start by itself after power-on (it is off after a fresh install). If it says a permission is needed, allow “Display over other apps”, or run:
@@ -97,7 +97,7 @@ No EPG, no Xtream Codes, no VOD/movies/series, no RTMP/RTSP/DASH, no DRM, no pho
 
 Её один раз делает тот, кто ставит приставку.
 
-1. Скачайте APK в разделе [Releases](https://github.com/uladzemer/IPTV-Simple-Player/releases/latest) и установите на приставку (Android 8.0 и новее, процессор ARM).
+1. Скачайте APK в разделе [Releases](https://github.com/uladzemer/SimpleTV/releases/latest) и установите на приставку (Android 8.0 и новее, процессор ARM).
 2. Запустите «Просто ТВ». Пока плейлиста нет, сразу откроются «Настройки».
 3. В строке «Добавить плейлист M3U» введите ссылку (`http://` или `https://`) и нажмите «Добавить».
 4. Проверьте «Канал при запуске» (по умолчанию — последний канал) и включите «Запуск при включении приставки», если канал должен включаться сам после включения приставки (после установки он выключен). Если появится «Нужно разрешение», разрешите показ поверх других окон или выполните с компьютера:
