@@ -12,6 +12,7 @@
     <string name="tv_simple_favorite_removed">Removed from favorites</string>
     <string name="tv_simple_back_again">Press Back again to open settings</string>
     <string name="tv_simple_no_signal">No signal. Retrying…</string>
+    <string name="tv_simple_no_network">No internet connection. Waiting for the network…</string>
     <string name="tv_simple_loading">Loading…</string>
     <string name="tv_simple_recovering">Channel stalled, restarting…</string>
     <string name="tv_simple_paused">Paused</string>

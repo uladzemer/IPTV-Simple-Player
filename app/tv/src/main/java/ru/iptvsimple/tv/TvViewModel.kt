@@ -27,6 +27,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import ru.iptvsimple.engine.channel.Channel
 import ru.iptvsimple.engine.channel.ChannelRepository
 import ru.iptvsimple.engine.db.PlaylistWithCount
+import ru.iptvsimple.engine.net.NetworkMonitor
 import ru.iptvsimple.engine.player.TvPlayerEngine
 import ru.iptvsimple.engine.playlist.ImportResult
 import ru.iptvsimple.engine.playlist.PlaylistRepository
@@ -62,6 +63,8 @@ data class TvScreenState(
     val playlistImportFeedback: TvPlaylistImportFeedback? = null,
     /** Сторож перезапускает зависший канал. */
     val recovering: Boolean = false,
+    /** У приставки нет сети: канал включится сам, как только она появится. */
+    val networkOffline: Boolean = false,
     /** Язык системы: по его правилам плейлисты идут по алфавиту. */
     val playlistLocale: Locale = Locale.getDefault(),
 ) {
@@ -86,6 +89,7 @@ class TvViewModel @Inject constructor(
     private val settings: TvSettings,
     private val playlistRepository: PlaylistRepository,
     private val channelRepository: ChannelRepository,
+    private val network: NetworkMonitor,
 ) : ViewModel() {
     /** Единственный изменяемый источник состояния экранов. */
     private val screen = MutableStateFlow(TvScreenState())
@@ -141,9 +145,11 @@ class TvViewModel @Inject constructor(
                 invertZapping = values.invertZapping,
             )
         }
+        network.state.feedInto { copy(networkOffline = !it.online) }
         retryAfterErrors()
         rampVolumeOnStart()
         watchForStalls()
+        restartWhenNetworkReturns()
         addBuiltInPlaylist()
         startOnLaunch()
     }
@@ -468,7 +474,8 @@ class TvViewModel @Inject constructor(
                 stallDetector.reset(SystemClock.elapsedRealtime())
                 while (true) {
                     delay(STALL_CHECK_MILLIS)
-                    if (!watching || state.value.zapTarget != null) {
+                    // Без сети перезапуски бесполезны: канал включится сам, когда сеть появится.
+                    if (!watching || state.value.zapTarget != null || !network.state.value.online) {
                         stallDetector.reset(SystemClock.elapsedRealtime())
                         continue
                     }
@@ -524,7 +531,33 @@ class TvViewModel @Inject constructor(
             engine.error.collectLatest { error ->
                 if (error == null) return@collectLatest
                 delay(ERROR_RETRY_MILLIS)
-                if (watching && engine.error.value != null) engine.restart()
+                // Без сети не пробуем: канал перезапустится, как только она появится.
+                if (watching && engine.error.value != null && network.state.value.online) engine.restart()
+            }
+        }
+    }
+
+    /**
+     * После включения приставки сеть появляется не сразу, а потом ещё может
+     * смениться (поднимается VPN). Канал, запущенный раньше, к этому времени
+     * висит на ошибках «адрес не найден». Как только сеть появилась или
+     * сменилась, а канал не играет, перезапускаем его сразу, не дожидаясь сторожа.
+     */
+    private fun restartWhenNetworkReturns() {
+        viewModelScope.launch {
+            var previous = network.state.value
+            network.state.collectLatest { now ->
+                val returned = now.online && (!previous.online || now.networkId != previous.networkId)
+                previous = now
+                if (!returned || !watching) return@collectLatest
+                // Даём сети секунду: адреса серверов начинают находиться не мгновенно.
+                delay(NETWORK_SETTLE_MILLIS)
+                val playing = engine.playbackState.value == Player.STATE_READY && engine.error.value == null
+                if (!watching || playing || currentChannel.value == null) return@collectLatest
+                Log.i(WATCHDOG_TAG, "сеть появилась (${now.networkId}) — перезапускаю канал сразу")
+                stallRestarts = 0
+                screen.update { it.copy(recovering = false) }
+                restartStalled()
             }
         }
     }
@@ -587,6 +620,7 @@ class TvViewModel @Inject constructor(
     private companion object {
         const val ZAP_SETTLE_MILLIS = 450L
         const val ERROR_RETRY_MILLIS = 5_000L
+        const val NETWORK_SETTLE_MILLIS = 1_000L
         const val RAMP_MILLIS = 300L
         const val RAMP_STEPS = 10
         const val RAMP_WAIT_RESTART_MILLIS = 3_000L

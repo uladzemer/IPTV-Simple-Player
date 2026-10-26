@@ -78,6 +78,7 @@ fun TvPlayerScreen(
     playbackState: Int,
     playbackFailed: Boolean,
     recovering: Boolean,
+    networkOffline: Boolean,
     invertZapping: Boolean,
     onZap: (Int) -> Unit,
     onPlayNumber: (Int) -> Unit,
@@ -242,6 +243,7 @@ fun TvPlayerScreen(
         )
 
         val status = when {
+            networkOffline -> stringResource(R.string.tv_simple_no_network)
             playbackFailed -> stringResource(R.string.tv_simple_no_signal)
             recovering -> stringResource(R.string.tv_simple_recovering)
             zapTarget != null || playbackState == Player.STATE_BUFFERING ->
@@ -254,7 +256,7 @@ fun TvPlayerScreen(
         }
 
         AnimatedVisibility(
-            visible = (infoVisible || playbackFailed || recovering) && displayed != null &&
+            visible = (infoVisible || playbackFailed || recovering || networkOffline) && displayed != null &&
                 !panelVisible && !menuVisible,
             enter = fadeIn(),
             exit = fadeOut(),
@@ -270,7 +272,7 @@ fun TvPlayerScreen(
             }
         }
 
-        if (status != null && !infoVisible && !playbackFailed && !recovering && !panelVisible) {
+        if (status != null && !infoVisible && !playbackFailed && !recovering && !networkOffline && !panelVisible) {
             OverlayCapsule(
                 text = status,
                 modifier = Modifier

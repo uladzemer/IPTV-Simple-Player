@@ -11,6 +11,7 @@
     <string name="tv_simple_favorite_added">Добавлено в избранное</string>
     <string name="tv_simple_favorite_removed">Убрано из избранного</string>
     <string name="tv_simple_back_again">Нажмите «Назад» ещё раз, чтобы открыть настройки</string>
+    <string name="tv_simple_no_network">Нет подключения к интернету. Жду сеть…</string>
     <string name="tv_simple_no_signal">Нет сигнала. Пробую снова…</string>
     <string name="tv_simple_loading">Загрузка…</string>
     <string name="tv_simple_recovering">Канал завис, перезапускаю…</string>

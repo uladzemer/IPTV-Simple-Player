@@ -154,6 +154,7 @@ private fun WatchingLayer(
             playbackState = engineState,
             playbackFailed = failed,
             recovering = screen.recovering,
+            networkOffline = screen.networkOffline,
             invertZapping = screen.invertZapping,
             onZap = model::zap,
             onPlayNumber = model::playNumber,
