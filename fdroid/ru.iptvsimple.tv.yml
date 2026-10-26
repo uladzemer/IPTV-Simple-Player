@@ -10,7 +10,7 @@ AutoName: Simple TV
 
 RepoType: git
 Repo: https://github.com/uladzemer/IPTV-Simple-Player.git
-Binaries:
+Binaries: 
   https://github.com/uladzemer/IPTV-Simple-Player/releases/download/v%v/SimpleTV-%v.apk
 
 Builds:
