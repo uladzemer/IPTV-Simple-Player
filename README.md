@@ -25,7 +25,7 @@
 
 Simple TV is an IPTV player built for one job: switch on the TV box and a live channel is already playing full screen. It is designed for viewers who do not want menus at all — elderly parents, kitchen TVs, waiting rooms, hotels.
 
-- **Plays on power-on.** The box boots, the last watched (or a chosen) channel starts full screen. No launcher, no menus.
+- **Plays on power-on.** Turn on one setting once, and every time the box boots the last watched (or a chosen) channel starts full screen. No launcher, no menus.
 - **Remote control only.** ▲/▼ switch channels, ◀ opens groups and the channel list, ▶ opens the channel menu, digits jump to a channel number, Back twice opens Settings.
 - **Hardware video decoding.** Video goes through the box's own MediaCodec decoders, hardware first (H.264, HEVC, MPEG-2, 4K UHD where the chip supports it). FFmpeg is never used for video, so there is no slow CPU decoding that drops frames.
 - **Correct audio sync.** AC3 / E-AC3 / AAC / MP2 are always decoded to PCM, with no HDMI passthrough, so playback speed is exact and the app volume works on every channel. Formats the box cannot decode itself, such as MP2, go through the bundled FFmpeg.
@@ -43,7 +43,7 @@ Simple TV is **written from scratch** in Kotlin with Jetpack Compose for TV and 
 1. Download the APK from [Releases](https://github.com/uladzemer/IPTV-Simple-Player/releases/latest) and install it on the TV box (Android 8.0+, ARM).
 2. Open Simple TV. With no playlist yet, Settings open automatically.
 3. Enter your M3U / M3U8 playlist link (`http://` or `https://`) and press **Add**.
-4. Check **Channel on launch** (default: last watched channel) and keep **Start when the box is switched on** enabled (it is on by default). If it says a permission is needed, allow “Display over other apps”, or run:
+4. Check **Channel on launch** (default: last watched channel) and turn on **Start when the box is switched on** if the channel should start by itself after power-on (it is off after a fresh install). If it says a permission is needed, allow “Display over other apps”, or run:
 
    ```bash
    adb shell appops set ru.iptvsimple.tv SYSTEM_ALERT_WINDOW allow
@@ -61,7 +61,7 @@ No EPG, no Xtream Codes, no VOD/movies/series, no RTMP/RTSP/DASH, no DRM, no pho
 
 «Просто ТВ» — IPTV-плеер с одной задачей: включили приставку — на экране уже идёт канал. Он сделан для зрителя, которому не нужны меню и настройки: для пожилых родителей, телевизора на кухне, приёмной, гостиницы.
 
-- **Канал сразу при включении.** Приставка загрузилась — на весь экран идёт последний канал (или выбранный заранее).
+- **Канал сразу при включении.** Один раз включите настройку — и после каждой загрузки приставки на весь экран идёт последний канал (или выбранный заранее).
 - **Только пульт.** ▲/▼ — каналы, ◀ — группы и список, ▶ — меню канала, цифры — канал по номеру, «Назад» дважды — «Настройки».
 - **Видео декодирует сама приставка** (MediaCodec, в первую очередь аппаратные декодеры: H.264, HEVC, MPEG-2, 4K UHD, если их поддерживает чип). FFmpeg для видео не используется, поэтому нет медленного программного декодирования, которое теряет кадры.
 - **Точная скорость и звук.** AC3, E-AC3, AAC и MP2 всегда декодируются в обычный звук, без передачи «как есть» на HDMI. Видео не «замедляется», громкость приложения работает на всех каналах. То, что приставка не умеет сама (например, MP2), декодирует встроенный FFmpeg.
@@ -95,7 +95,7 @@ No EPG, no Xtream Codes, no VOD/movies/series, no RTMP/RTSP/DASH, no DRM, no pho
 1. Скачайте APK в разделе [Releases](https://github.com/uladzemer/IPTV-Simple-Player/releases/latest) и установите на приставку (Android 8.0 и новее, процессор ARM).
 2. Запустите «Просто ТВ». Пока плейлиста нет, сразу откроются «Настройки».
 3. В строке «Добавить плейлист M3U» введите ссылку (`http://` или `https://`) и нажмите «Добавить».
-4. Проверьте «Канал при запуске» (по умолчанию — последний канал) и оставьте включённым «Запуск при включении приставки» (он включён сразу после установки). Если появится «Нужно разрешение», разрешите показ поверх других окон или выполните с компьютера:
+4. Проверьте «Канал при запуске» (по умолчанию — последний канал) и включите «Запуск при включении приставки», если канал должен включаться сам после включения приставки (после установки он выключен). Если появится «Нужно разрешение», разрешите показ поверх других окон или выполните с компьютера:
 
    ```bash
    adb shell appops set ru.iptvsimple.tv SYSTEM_ALERT_WINDOW allow

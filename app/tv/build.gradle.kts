@@ -36,7 +36,7 @@ val releaseStoreFile = releaseSigningValue("RELEASE_KEYSTORE_FILE", "storeFile")
 
 // Версия для зрителя; она же входит в имя готового файла:
 // app/tv/build/outputs/apk/release/tv-<версия>-release.apk
-val appVersionName = "1.3.1"
+val appVersionName = "1.3.2"
 base.archivesName = "tv-$appVersionName"
 
 android {
@@ -47,7 +47,7 @@ android {
         applicationId = "ru.iptvsimple.tv"
         minSdk = 26
         targetSdk = 33
-        versionCode = 6
+        versionCode = 7
         versionName = appVersionName
         buildConfigField("String", "TV_DEFAULT_PLAYLIST_URL", asJavaStringLiteral(tvDefaultPlaylistUrl.get()))
         // Приставки — только ARM; библиотеки FFmpeg для x86 лишь раздувают APK.

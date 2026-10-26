@@ -1,6 +1,7 @@
 package ru.iptvsimple.engine.settings
 
 import android.content.Context
+import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -49,13 +50,45 @@ data class TvPreferences(
 ) {
     companion object {
         const val DEFAULT_STARTUP_CHANNEL_NUMBER = 1
-        const val DEFAULT_START_ON_BOOT = true
+        /**
+         * Автозапуск при включении приставки человек включает сам. Раньше он был
+         * включён сразу; приставки, обновлённые с тех версий, его сохраняют
+         * ([StartOnBootMigration]).
+         */
+        const val DEFAULT_START_ON_BOOT = false
         const val DEFAULT_INVERT_ZAPPING = false
     }
 }
 
 /** Один файл настроек на процесс: DataStore нельзя открывать дважды. */
-private val Context.tvSettingsStore: DataStore<Preferences> by preferencesDataStore(name = "tv_settings")
+private val Context.tvSettingsStore: DataStore<Preferences> by preferencesDataStore(
+    name = "tv_settings",
+    produceMigrations = { context -> listOf(StartOnBootMigration(context)) },
+)
+
+private val START_ON_BOOT_KEY = booleanPreferencesKey("start_on_boot")
+
+/**
+ * До версии 1.3.2 автозапуск был включён по умолчанию и в файл не записывался.
+ * Один раз, пока значения в файле нет, записываем его явно: приложению,
+ * обновлённому со старой версии, — «включено», как и работало; новой
+ * установке — «выключено».
+ */
+private class StartOnBootMigration(private val context: Context) : DataMigration<Preferences> {
+    override suspend fun shouldMigrate(currentData: Preferences) = START_ON_BOOT_KEY !in currentData
+
+    override suspend fun migrate(currentData: Preferences): Preferences {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        val enabled = startOnBootAfterUpdate(info.firstInstallTime, info.lastUpdateTime)
+        return currentData.toMutablePreferences().apply { this[START_ON_BOOT_KEY] = enabled }
+    }
+
+    override suspend fun cleanUp() = Unit
+}
+
+/** Приложение стояло раньше (его обновили) — значит, автозапуск у него работал. */
+internal fun startOnBootAfterUpdate(firstInstallTime: Long, lastUpdateTime: Long): Boolean =
+    lastUpdateTime > firstInstallTime
 
 /**
  * Настройки «простого плеера», которые меняет тот, кто ставит приставку.
@@ -102,7 +135,7 @@ class TvSettings @Inject constructor(
     private object Keys {
         val STARTUP_MODE = intPreferencesKey("startup_mode")
         val STARTUP_CHANNEL_NUMBER = intPreferencesKey("startup_channel_number")
-        val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
+        val START_ON_BOOT = START_ON_BOOT_KEY
         val INVERT_ZAPPING = booleanPreferencesKey("invert_zapping")
     }
 
