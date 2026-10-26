@@ -17,6 +17,11 @@
   &nbsp;·&nbsp; <a href="#keywords--ключевые-слова">Keywords</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/uladzemer/IPTV-Simple-Player">GitHub</a>
+  &nbsp;·&nbsp; <a href="https://gitlab.com/uladzemer/IPTV-Simple-Player">GitLab (mirror · зеркало)</a>
+</p>
+
 ![On air: HGTV with the channel bar](docs/screenshots/01-on-air.jpg)
 
 ---
