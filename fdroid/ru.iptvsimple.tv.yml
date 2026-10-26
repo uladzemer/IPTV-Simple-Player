@@ -1,5 +1,5 @@
 Categories:
-  - Multimedia
+  - Online Media Player
 License: GPL-3.0-only
 AuthorName: uladzemer
 SourceCode: https://github.com/uladzemer/IPTV-Simple-Player
@@ -10,14 +10,21 @@ AutoName: Simple TV
 
 RepoType: git
 Repo: https://github.com/uladzemer/IPTV-Simple-Player.git
+Binaries: https://github.com/uladzemer/IPTV-Simple-Player/releases/download/v%v/SimpleTV-%v.apk
 
 Builds:
   - versionName: 1.3.3
     versionCode: 8
-    commit: v1.3.3
+    commit: 68ed4dfa8e7b5c5f69ff2021cd8f3bdbdd68c47d
     subdir: app/tv
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
     gradle:
       - yes
+
+AllowedAPKSigningKeys: 728a8d1270d6dca6fd05f15bb245bd82e6b350c53e394928778dc6d6ae4cceaa
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
