@@ -202,3 +202,26 @@ internal class TvStallDetector(
         const val STATE_ENDED = 4
     }
 }
+
+/** Короткое имя видеокодека для плашки канала или null, если кодек редкий. */
+internal fun tvVideoCodecName(mimeType: String?): String? = when (mimeType) {
+    "video/avc" -> "H.264"
+    "video/hevc" -> "H.265"
+    "video/mpeg2" -> "MPEG-2"
+    "video/av01" -> "AV1"
+    "video/x-vnd.on2.vp9" -> "VP9"
+    else -> null
+}
+
+/** Частота кадров без лишних нулей: 25, 29.97, 23.98; null, если поток её не сообщил. */
+internal fun tvFrameRateText(frameRate: Float): String? {
+    if (!(frameRate > 0f) || frameRate.isInfinite()) return null
+    val hundredths = Math.round(frameRate * 100.0)
+    val whole = hundredths / 100
+    val rest = hundredths % 100
+    return when {
+        rest == 0L -> whole.toString()
+        rest % 10 == 0L -> "$whole.${rest / 10}"
+        else -> "$whole.${rest.toString().padStart(2, '0')}"
+    }
+}

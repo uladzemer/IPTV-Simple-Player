@@ -8,6 +8,11 @@
     <string name="tv_simple_menu_favorite_remove">Убрать из избранного</string>
     <string name="tv_simple_menu_restart">Перезапустить канал</string>
     <string name="tv_simple_menu_channels">Список каналов</string>
+    <string name="tv_simple_menu_aspect">Пропорции: %1$s</string>
+    <string name="tv_simple_aspect_auto">Авто</string>
+    <string name="tv_simple_aspect_classic">4:3</string>
+    <string name="tv_simple_aspect_film">3:2</string>
+    <string name="tv_simple_stream_fps">%1$s FPS</string>
     <string name="tv_simple_favorite_added">Добавлено в избранное</string>
     <string name="tv_simple_favorite_removed">Убрано из избранного</string>
     <string name="tv_simple_back_again">Нажмите «Назад» ещё раз, чтобы открыть настройки</string>
@@ -34,8 +39,9 @@
     <string name="tv_simple_startup_favorite">Первый из избранного</string>
     <string name="tv_simple_startup_number">Канал по номеру</string>
     <string name="tv_simple_startup_number_value">Канал № %1$d</string>
-    <string name="tv_settings_number_title">Номер канала</string>
-    <string name="tv_settings_number_hint">◀ ▶ — уменьшить или увеличить</string>
+    <string name="tv_settings_startup_channel">Канал</string>
+    <string name="tv_settings_startup_channels_loading">Загружаю каналы…</string>
+    <string name="tv_settings_stream_info_title">Сведения о потоке на плашке</string>
     <string name="tv_simple_zapping_title">Кнопка «вверх»</string>
     <string name="tv_simple_zapping_next">Следующий канал</string>
     <string name="tv_simple_zapping_previous">Предыдущий канал</string>

@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -56,11 +58,17 @@ private fun DesignCanvas(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalDensity provides density, content = content)
 }
 
-/** Тёмная тема TV Material из нашей палитры и фон под всем содержимым окна. */
+/**
+ * Тёмная тема TV Material из нашей палитры и фон под всем содержимым окна.
+ * Списки прокручиваются за фокусом по [TvListScroll].
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SimpleTvTheme(content: @Composable () -> Unit) {
     val colors = remember { tvMaterialColors() }
     MaterialTheme(colorScheme = colors) {
-        Box(Modifier.background(TvColors.Backdrop)) { content() }
+        CompositionLocalProvider(LocalBringIntoViewSpec provides TvListScroll) {
+            Box(Modifier.background(TvColors.Backdrop)) { content() }
+        }
     }
 }

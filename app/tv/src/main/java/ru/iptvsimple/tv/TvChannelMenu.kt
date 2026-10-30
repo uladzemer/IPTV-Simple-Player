@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import ru.iptvsimple.engine.channel.Channel
+import ru.iptvsimple.engine.settings.ChannelAspect
 import kotlinx.coroutines.yield
 
 /**
@@ -41,6 +43,8 @@ internal fun TvChannelMenu(
     channel: Channel,
     number: Int?,
     favorite: Boolean,
+    aspect: ChannelAspect,
+    onCycleAspect: () -> Unit,
     onToggleFavorite: () -> Unit,
     onRestart: () -> Unit,
     onOpenChannels: () -> Unit,
@@ -96,6 +100,13 @@ internal fun TvChannelMenu(
             onClick = onRestart,
             onClose = onClose,
         )
+        // Меню остаётся открытым: видно, как меняется картинка, и можно нажать ещё раз.
+        MenuItem(
+            icon = Icons.Rounded.AspectRatio,
+            text = stringResource(R.string.tv_simple_menu_aspect, stringResource(aspect.labelRes())),
+            onClick = onCycleAspect,
+            onClose = onClose,
+        )
         MenuItem(
             icon = Icons.AutoMirrored.Rounded.List,
             text = stringResource(R.string.tv_simple_menu_channels),
@@ -149,4 +160,10 @@ private fun MenuItem(
             )
         }
     }
+}
+
+private fun ChannelAspect.labelRes(): Int = when (this) {
+    ChannelAspect.AUTO -> R.string.tv_simple_aspect_auto
+    ChannelAspect.CLASSIC -> R.string.tv_simple_aspect_classic
+    ChannelAspect.FILM -> R.string.tv_simple_aspect_film
 }

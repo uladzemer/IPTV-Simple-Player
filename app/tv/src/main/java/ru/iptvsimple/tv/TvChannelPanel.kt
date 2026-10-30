@@ -84,16 +84,14 @@ internal fun TvChannelPanel(
     val groupListState = rememberLazyListState()
     val channelListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val targetChannelIndex = selectedGroup?.channels
-        ?.indexOfFirst { it.id == currentChannelId }
-        ?.coerceAtLeast(0)
-        ?: 0
     val showPlaylists = playlists.size > 1
 
+    // Каналы группы всегда листаются с начала, даже если идущий канал
+    // в середине списка: он и так виден по синей подложке.
     fun focusChannels() {
         if (selectedGroup?.channels.isNullOrEmpty()) return
         scope.launch {
-            channelListState.scrollToItem(targetChannelIndex)
+            channelListState.scrollToItem(0)
             yield()
             runCatching { channelRequester.requestFocus() }
         }
@@ -107,6 +105,9 @@ internal fun TvChannelPanel(
             runCatching { groupRequesters[group.key]?.requestFocus() }
         }
     }
+
+    // Другая группа под фокусом — её каналы показываем с начала.
+    LaunchedEffect(selectedGroup?.key) { channelListState.scrollToItem(0) }
 
     LaunchedEffect(groups.isEmpty(), panelPlaylistUrl) {
         if (groups.isNotEmpty()) {
@@ -132,6 +133,7 @@ internal fun TvChannelPanel(
             modifier = Modifier
                 .width(TvSizes.GroupColumn)
                 .fillMaxHeight()
+                .tvSteadyRepeat()
         ) {
             item { PanelHeader(stringResource(R.string.tv_simple_panel_groups)) }
             itemsIndexed(groups, key = { _, group -> group.key }) { _, group ->
@@ -173,6 +175,7 @@ internal fun TvChannelPanel(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
+                .tvSteadyRepeat()
         ) {
             item { PanelHeader(selectedGroup?.title.orEmpty()) }
             if (groupChannels.isEmpty()) {
@@ -191,7 +194,7 @@ internal fun TvChannelPanel(
                     channel = channel,
                     playing = channel.id == currentChannelId,
                     favorite = channel.id in favoriteIds,
-                    focusRequester = channelRequester.takeIf { index == targetChannelIndex },
+                    focusRequester = channelRequester.takeIf { index == 0 },
                     onClick = { onPlay(channel, groupChannels) },
                     onKeyDown = { key ->
                         if (key == Key.DirectionLeft) {

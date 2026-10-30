@@ -1,9 +1,11 @@
 package ru.iptvsimple.tv
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -52,6 +55,53 @@ class TvFocusLook(val grow: Float, val shape: Shape) {
 
         /** Строка меню или боковой панели: не растёт, только светлеет. */
         val MenuRow = TvFocusLook(grow = 1f, shape = TvShapes.Medium)
+    }
+}
+
+/**
+ * Как список прокручивается за фокусом пульта. Системный вариант для ТВ
+ * держит строку в фокусе на трети высоты и сдвигает весь список на каждое
+ * нажатие; при зажатой стрелке сдвиги перебивают друг друга, и строки дёргаются.
+ * Здесь список стоит, пока строка в фокусе далеко от края, и сдвигается ровно
+ * настолько, чтобы до края оставался запас [EDGE_FRACTION] высоты списка.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+internal object TvListScroll : BringIntoViewSpec {
+    private const val EDGE_FRACTION = 0.2f
+
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
+        // Строка выше списка целиком не помещается в запас — тогда запас меньше.
+        val margin = (containerSize * EDGE_FRACTION)
+            .coerceAtMost(((containerSize - size) / 2f).coerceAtLeast(0f))
+        val beforeStart = offset - margin
+        val afterEnd = offset + size + margin - containerSize
+        return when {
+            beforeStart < 0f -> beforeStart
+            afterEnd > 0f -> afterEnd
+            else -> 0f
+        }
+    }
+}
+
+/** Шаг зажатой стрелки в списке: не чаще, чем список успевает плавно сдвинуться. */
+private const val REPEAT_STEP_MILLIS = 90L
+
+/**
+ * Зажатая стрелка ▲/▼ двигает фокус не чаще раза в [REPEAT_STEP_MILLIS].
+ * Пульт присылает повторы быстрее, чем список успевает прокрутиться, и фокус
+ * уходил за край, а список догонял его рывками. Первое нажатие проходит сразу.
+ */
+@Composable
+fun Modifier.tvSteadyRepeat(): Modifier {
+    // Время последнего шага переживает перерисовки: они идут на каждом шаге фокуса.
+    val lastStepAt = remember { longArrayOf(0L) }
+    return onPreviewKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+        if (event.key != Key.DirectionUp && event.key != Key.DirectionDown) return@onPreviewKeyEvent false
+        val native = event.nativeKeyEvent
+        val tooSoon = native.repeatCount > 0 && native.eventTime - lastStepAt[0] < REPEAT_STEP_MILLIS
+        if (!tooSoon) lastStepAt[0] = native.eventTime
+        tooSoon
     }
 }
 

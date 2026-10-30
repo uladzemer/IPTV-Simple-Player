@@ -80,12 +80,11 @@ object TvSizes {
     val LogoSmall = 48.dp
     val LogoLarge = 72.dp
 
-    /** Наименьшая высота строк разного вида: от строки плейлиста до выбора номера. */
+    /** Наименьшая высота строк разного вида: от строки плейлиста до строки настроек. */
     val RowShort = 48.dp
     val RowCompact = 56.dp
     val Row = 64.dp
     val RowTall = 72.dp
-    val RowStepper = 88.dp
 
     /**
      * Холст интерфейса: все размеры рассчитаны на экран 1280×720 dp и

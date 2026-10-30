@@ -8,6 +8,11 @@
     <string name="tv_simple_menu_favorite_remove">Remove from favorites</string>
     <string name="tv_simple_menu_restart">Restart channel</string>
     <string name="tv_simple_menu_channels">Channel list</string>
+    <string name="tv_simple_menu_aspect">Aspect: %1$s</string>
+    <string name="tv_simple_aspect_auto">Auto</string>
+    <string name="tv_simple_aspect_classic">4:3</string>
+    <string name="tv_simple_aspect_film">3:2</string>
+    <string name="tv_simple_stream_fps">%1$s FPS</string>
     <string name="tv_simple_favorite_added">Added to favorites</string>
     <string name="tv_simple_favorite_removed">Removed from favorites</string>
     <string name="tv_simple_back_again">Press Back again to open settings</string>
@@ -34,8 +39,9 @@
     <string name="tv_simple_startup_favorite">First favorite channel</string>
     <string name="tv_simple_startup_number">Channel by number</string>
     <string name="tv_simple_startup_number_value">Channel № %1$d</string>
-    <string name="tv_settings_number_title">Channel number</string>
-    <string name="tv_settings_number_hint">◀ ▶ — decrease or increase</string>
+    <string name="tv_settings_startup_channel">Channel</string>
+    <string name="tv_settings_startup_channels_loading">Loading channels…</string>
+    <string name="tv_settings_stream_info_title">Stream info on the channel banner</string>
     <string name="tv_simple_zapping_title">Up button</string>
     <string name="tv_simple_zapping_next">Next channel</string>
     <string name="tv_simple_zapping_previous">Previous channel</string>

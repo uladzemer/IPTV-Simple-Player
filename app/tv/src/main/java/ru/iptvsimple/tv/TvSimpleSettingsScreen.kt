@@ -24,6 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.PowerSettingsNew
@@ -77,6 +82,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import kotlinx.coroutines.yield
+import ru.iptvsimple.engine.channel.Channel
 import ru.iptvsimple.engine.settings.StartupMode
 
 /** Настройки, у которых варианты открываются в боковой панели. */
@@ -95,6 +101,8 @@ internal fun TvSimpleSettingsScreen(
     onStartupChannelNumber: (Int) -> Unit,
     onStartOnBoot: (Boolean) -> Unit,
     onInvertZapping: (Boolean) -> Unit,
+    onShowStreamInfo: (Boolean) -> Unit,
+    onLoadStartupChannels: () -> Unit,
     onAddPlaylist: (String) -> Unit,
     onRefreshPlaylists: () -> Unit,
     onQuit: () -> Unit,
@@ -149,6 +157,10 @@ internal fun TvSimpleSettingsScreen(
         }
     }
     BackHandler(enabled = panel != null) { closePanel() }
+    // Плейлисты обновились, пока панель открыта, — номера могли сдвинуться.
+    LaunchedEffect(panel, state.playlists) {
+        if (panel == SettingsPanel.Startup) onLoadStartupChannels()
+    }
 
     val bootValue = when {
         !state.startOnBoot -> stringResource(R.string.tv_simple_off)
@@ -253,6 +265,15 @@ internal fun TvSimpleSettingsScreen(
                     )
                 }
             }
+            item {
+                SettingsRow(
+                    icon = Icons.Rounded.Info,
+                    title = stringResource(R.string.tv_settings_stream_info_title),
+                    value = stringResource(if (state.showStreamInfo) R.string.tv_simple_on else R.string.tv_simple_off),
+                    toggle = state.showStreamInfo,
+                    onClick = { onShowStreamInfo(!state.showStreamInfo) },
+                )
+            }
             item { SectionLabel(stringResource(R.string.tv_settings_section_source)) }
             item {
                 SettingsRow(
@@ -292,29 +313,50 @@ internal fun TvSimpleSettingsScreen(
         }
 
         when (panel) {
-            SettingsPanel.Startup -> SidePanel(
-                title = stringResource(R.string.tv_simple_startup_title),
-                onClose = ::closePanel,
-            ) { firstRequester ->
-                StartupMode.entries.forEach { mode ->
-                    OptionRow(
-                        text = stringResource(mode.labelRes()),
-                        selected = state.startupMode == mode,
-                        focusRequester = firstRequester.takeIf { state.startupMode == mode },
-                        onClose = ::closePanel,
-                        onClick = {
-                            onStartupMode(mode)
-                            if (mode != StartupMode.CHANNEL_NUMBER) closePanel()
-                        },
-                    )
+            SettingsPanel.Startup -> {
+                val startupList = rememberLazyListState()
+                val pickedRequester = remember { FocusRequester() }
+                val byNumber = state.startupMode == StartupMode.CHANNEL_NUMBER
+                val pickedIndex = state.startupChannels.orEmpty()
+                    .indexOfFirst { it.number == state.startupChannelNumber }
+                // Список длинный: сразу показываем и ставим фокус на выбранный канал.
+                LaunchedEffect(byNumber, pickedIndex) {
+                    if (!byNumber || pickedIndex < 0) return@LaunchedEffect
+                    startupList.scrollToItem(STARTUP_CHANNELS_FIRST_ITEM + pickedIndex)
+                    yield()
+                    runCatching { pickedRequester.requestFocus() }
                 }
-                if (state.startupMode == StartupMode.CHANNEL_NUMBER) {
-                    NumberStepperRow(
-                        title = stringResource(R.string.tv_settings_number_title),
-                        value = state.startupChannelNumber,
-                        hint = stringResource(R.string.tv_settings_number_hint),
-                        onChange = { onStartupChannelNumber(it.coerceAtLeast(1)) },
-                    )
+                SidePanel(
+                    title = stringResource(R.string.tv_simple_startup_title),
+                    onClose = ::closePanel,
+                    listState = startupList,
+                    items = {
+                        if (byNumber) {
+                            startupChannelItems(
+                                channels = state.startupChannels,
+                                selectedNumber = state.startupChannelNumber,
+                                pickedRequester = pickedRequester,
+                                onPick = { number ->
+                                    onStartupChannelNumber(number)
+                                    closePanel()
+                                },
+                                onClose = ::closePanel,
+                            )
+                        }
+                    },
+                ) { firstRequester ->
+                    StartupMode.entries.forEach { mode ->
+                        OptionRow(
+                            text = stringResource(mode.labelRes()),
+                            selected = state.startupMode == mode,
+                            focusRequester = firstRequester.takeIf { state.startupMode == mode },
+                            onClose = ::closePanel,
+                            onClick = {
+                                onStartupMode(mode)
+                                if (mode != StartupMode.CHANNEL_NUMBER) closePanel()
+                            },
+                        )
+                    }
                 }
             }
 
@@ -462,11 +504,17 @@ private fun PlaylistsPanelContent(
     }
 }
 
-/** Варианты одной настройки; панель выезжает поверх правой части экрана. */
+/**
+ * Варианты одной настройки; панель выезжает поверх правой части экрана.
+ * Длинный список (например, все каналы) идёт после [content] в [items]:
+ * так строятся только видимые строки.
+ */
 @Composable
 private fun SidePanel(
     title: String,
     onClose: () -> Unit,
+    listState: LazyListState = rememberLazyListState(),
+    items: LazyListScope.() -> Unit = {},
     content: @Composable (firstRequester: FocusRequester) -> Unit,
 ) {
     val firstRequester = remember { FocusRequester() }
@@ -476,6 +524,7 @@ private fun SidePanel(
     }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterEnd) {
         LazyColumn(
+            state = listState,
             verticalArrangement = Arrangement.spacedBy(TvSpacing.Small),
             contentPadding = PaddingValues(
                 horizontal = TvSpacing.Large,
@@ -485,6 +534,7 @@ private fun SidePanel(
                 .width(TvSizes.SidePanel)
                 .fillMaxHeight()
                 .background(TvColors.Card)
+                .tvSteadyRepeat()
         ) {
             item {
                 Text(
@@ -504,7 +554,47 @@ private fun SidePanel(
                     content(firstRequester)
                 }
             }
+            items()
         }
+    }
+}
+
+/** Первые строки панели — заголовок, варианты и подпись, за ними идут каналы. */
+private const val STARTUP_CHANNELS_FIRST_ITEM = 3
+
+/**
+ * Каналы, из которых выбирают стартовый: номер — место канала в плейлисте.
+ * [channels] = null — список ещё грузится.
+ */
+private fun LazyListScope.startupChannelItems(
+    channels: List<Channel>?,
+    selectedNumber: Int,
+    pickedRequester: FocusRequester,
+    onPick: (Int) -> Unit,
+    onClose: () -> Unit,
+) {
+    item { SectionLabel(stringResource(R.string.tv_settings_startup_channel)) }
+    if (channels.isNullOrEmpty()) {
+        item {
+            HintText(
+                text = stringResource(
+                    if (channels == null) R.string.tv_settings_startup_channels_loading
+                    else R.string.tv_simple_panel_empty
+                ),
+                modifier = Modifier.padding(horizontal = TvSpacing.Medium),
+            )
+        }
+        return
+    }
+    items(channels, key = { it.id }) { channel ->
+        val picked = channel.number == selectedNumber
+        OptionRow(
+            text = "${channel.number}. ${channel.title.capitalizedWords()}",
+            selected = picked,
+            focusRequester = pickedRequester.takeIf { picked },
+            onClick = { onPick(channel.number) },
+            onClose = onClose,
+        )
     }
 }
 
@@ -668,62 +758,6 @@ private fun PanelRow(
                 fontFamily = TvFonts.Ui,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-/** Номер канала выбирается кнопками влево/вправо, клавиатура не нужна. */
-@Composable
-private fun NumberStepperRow(
-    title: String,
-    value: Int,
-    hint: String,
-    onChange: (Int) -> Unit,
-) {
-    TvPressable(
-        label = "$title $value",
-        onPress = {},
-        look = TvFocusLook.MenuRow,
-        onKeyDown = { key ->
-            when (key) {
-                Key.DirectionLeft -> { onChange(value - 1); true }
-                Key.DirectionRight -> { onChange(value + 1); true }
-                else -> false
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = TvSizes.RowStepper)
-    ) { focused ->
-        val color = if (focused) TvColors.OnFocusFill else TvColors.Ink
-        Column(
-            verticalArrangement = Arrangement.spacedBy(TvSpacing.XSmall),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(horizontal = TvSpacing.Medium)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title,
-                    color = color,
-                    fontSize = TvType.Body,
-                    fontFamily = TvFonts.Ui,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = "‹  $value  ›",
-                    color = color,
-                    fontSize = TvType.Title,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = TvFonts.Ui,
-                )
-            }
-            Text(
-                text = hint,
-                color = if (focused) TvColors.OnFocusFill.copy(alpha = 0.7f) else TvColors.InkSoft,
-                fontSize = TvType.Label,
-                fontFamily = TvFonts.Ui,
             )
         }
     }

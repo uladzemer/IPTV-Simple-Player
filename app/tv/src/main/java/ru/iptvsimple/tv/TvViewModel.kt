@@ -31,6 +31,7 @@ import ru.iptvsimple.engine.net.NetworkMonitor
 import ru.iptvsimple.engine.player.TvPlayerEngine
 import ru.iptvsimple.engine.playlist.ImportResult
 import ru.iptvsimple.engine.playlist.PlaylistRepository
+import ru.iptvsimple.engine.settings.ChannelAspect
 import ru.iptvsimple.engine.settings.StartupMode
 import ru.iptvsimple.engine.settings.TvPreferences
 import ru.iptvsimple.engine.settings.TvSettings
@@ -59,6 +60,11 @@ data class TvScreenState(
     val startupChannelNumber: Int = TvPreferences.DEFAULT_STARTUP_CHANNEL_NUMBER,
     val startOnBoot: Boolean = TvPreferences.DEFAULT_START_ON_BOOT,
     val invertZapping: Boolean = TvPreferences.DEFAULT_INVERT_ZAPPING,
+    val showStreamInfo: Boolean = TvPreferences.DEFAULT_SHOW_STREAM_INFO,
+    /** Каналы с пропорциями, заданными вручную; остальные — [ChannelAspect.AUTO]. */
+    val channelAspects: Map<Long, ChannelAspect> = emptyMap(),
+    /** Каналы, из которых в настройках выбирают стартовый: номер берётся по ним; null — ещё грузятся. */
+    val startupChannels: List<Channel>? = null,
     val playlistImportInProgress: Boolean = false,
     val playlistImportFeedback: TvPlaylistImportFeedback? = null,
     /** Сторож перезапускает зависший канал. */
@@ -143,6 +149,8 @@ class TvViewModel @Inject constructor(
                 startupChannelNumber = values.startupChannelNumber,
                 startOnBoot = values.startOnBoot,
                 invertZapping = values.invertZapping,
+                showStreamInfo = values.showStreamInfo,
+                channelAspects = values.channelAspects,
             )
         }
         network.state.feedInto { copy(networkOffline = !it.online) }
@@ -248,6 +256,12 @@ class TvViewModel @Inject constructor(
         screen.update { it.copy(autoPlayRequested = false) }
     }
 
+    /** Переключает пропорции показанного канала на следующие по кругу. */
+    fun cycleCurrentAspect() {
+        val channel = state.value.zapTarget ?: currentChannel.value ?: return
+        viewModelScope.launch { settings.cycleChannelAspect(channel.id) }
+    }
+
     /** Новое состояние избранного у показанного канала или null, если канала нет. */
     fun toggleCurrentFavorite(): Boolean? {
         val channel = state.value.zapTarget ?: currentChannel.value ?: return null
@@ -300,6 +314,22 @@ class TvViewModel @Inject constructor(
 
     fun setInvertZapping(enabled: Boolean) {
         viewModelScope.launch { settings.setInvertZapping(enabled) }
+    }
+
+    fun setShowStreamInfo(enabled: Boolean) {
+        viewModelScope.launch { settings.setShowStreamInfo(enabled) }
+    }
+
+    /**
+     * Загружает каналы для выбора стартового. Номер стартового канала считается
+     * по первому плейлисту с каналами — так же, как при запуске ([startOnLaunch]).
+     */
+    fun loadStartupChannels() {
+        viewModelScope.launch {
+            val first = state.value.playlists.firstOrNull { it.channelCount > 0 }
+            val channels = first?.let { channelRepository.byPlaylist(it.url) }.orEmpty()
+            screen.update { it.copy(startupChannels = channels) }
+        }
     }
 
     fun addPlaylist(url: String) {

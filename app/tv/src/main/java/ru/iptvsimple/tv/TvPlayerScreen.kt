@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,7 +47,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
+import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
@@ -53,6 +59,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import ru.iptvsimple.engine.channel.Channel
 import ru.iptvsimple.engine.db.PlaylistWithCount
+import ru.iptvsimple.engine.settings.ChannelAspect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 
@@ -80,10 +87,13 @@ fun TvPlayerScreen(
     recovering: Boolean,
     networkOffline: Boolean,
     invertZapping: Boolean,
+    showStreamInfo: Boolean,
+    channelAspects: Map<Long, ChannelAspect>,
     onZap: (Int) -> Unit,
     onPlayNumber: (Int) -> Unit,
     onPlayFromPanel: (Channel, List<Channel>) -> Unit,
     onToggleFavorite: () -> Boolean?,
+    onCycleAspect: () -> Unit,
     onOpenPanel: () -> Unit,
     onSelectPanelPlaylist: (String) -> Unit,
     onRestart: () -> Unit,
@@ -95,6 +105,8 @@ fun TvPlayerScreen(
     val displayed = zapTarget ?: channel
     val displayedNumber = displayed?.let(numbering::numberOf)
     val favoriteIds = remember(favorites) { favorites.mapTo(mutableSetOf()) { it.id } }
+    val aspect = channel?.let { channelAspects[it.id] } ?: ChannelAspect.AUTO
+    val streamInfo = if (showStreamInfo) rememberStreamInfo(player) else null
 
     var panelVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
@@ -167,10 +179,19 @@ fun TvPlayerScreen(
             .background(Color.Black)
     ) {
         if (player != null) {
+            // Заданные вручную пропорции сужают картинку по ширине, по краям — чёрные поля.
+            val ratio = aspect.ratio
             PlayerSurface(
                 player = player,
                 surfaceType = SURFACE_TYPE_SURFACE_VIEW,
-                modifier = Modifier.fillMaxSize()
+                modifier = if (ratio == null) {
+                    Modifier.fillMaxSize()
+                } else {
+                    Modifier
+                        .align(Alignment.Center)
+                        .fillMaxHeight()
+                        .aspectRatio(ratio, matchHeightConstraintsFirst = true)
+                }
             )
         }
         Box(
@@ -268,6 +289,8 @@ fun TvPlayerScreen(
                     number = displayedNumber,
                     favorite = displayed.id in favoriteIds,
                     status = status,
+                    // Сведения относятся к идущему потоку, а не к каналу, на который листают.
+                    streamInfo = streamInfo.takeIf { zapTarget == null },
                 )
             }
         }
@@ -324,6 +347,8 @@ fun TvPlayerScreen(
                 channel = displayed,
                 number = displayedNumber,
                 favorite = displayed.id in favoriteIds,
+                aspect = channelAspects[displayed.id] ?: ChannelAspect.AUTO,
+                onCycleAspect = onCycleAspect,
                 onToggleFavorite = {
                     menuVisible = false
                     onToggleFavorite()?.let { added ->
@@ -352,6 +377,7 @@ private fun ChannelBanner(
     number: Int?,
     favorite: Boolean,
     status: String?,
+    streamInfo: String?,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(TvSpacing.Medium),
@@ -428,7 +454,10 @@ private fun ChannelBanner(
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(TvSpacing.XLarge)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(TvSpacing.XLarge),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             listOf(
                 stringResource(R.string.tv_simple_hint_zap),
                 stringResource(R.string.tv_simple_hint_groups),
@@ -436,6 +465,16 @@ private fun ChannelBanner(
             ).forEach { hint ->
                 Text(
                     text = hint,
+                    color = TvColors.InkSoft,
+                    fontSize = TvType.Body,
+                    fontFamily = TvFonts.Ui,
+                    maxLines = 1
+                )
+            }
+            if (streamInfo != null) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = streamInfo,
                     color = TvColors.InkSoft,
                     fontSize = TvType.Body,
                     fontFamily = TvFonts.Ui,
@@ -465,6 +504,53 @@ private fun OverlayCapsule(
             .clip(TvShapes.Medium)
             .background(TvColors.Veil)
             .padding(horizontal = TvSpacing.Large, vertical = TvSpacing.Compact)
+    )
+}
+
+/**
+ * Разрешение, частота кадров и кодек идущего потока, например
+ * «1920×1080 · 25 FPS · H.264». Обновляется, когда плеер узнаёт о потоке больше.
+ */
+@Composable
+private fun rememberStreamInfo(player: Player?): String? {
+    var video by remember(player) { mutableStateOf(player?.let(::videoOf)) }
+    DisposableEffect(player) {
+        if (player == null) return@DisposableEffect onDispose {}
+        val listener = object : Player.Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                video = videoOf(player)
+            }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                video = videoOf(player)
+            }
+        }
+        player.addListener(listener)
+        video = videoOf(player)
+        onDispose { player.removeListener(listener) }
+    }
+    val current = video ?: return null
+    if (current.width <= 0 || current.height <= 0) return null
+    val fps = tvFrameRateText(current.frameRate)?.let { stringResource(R.string.tv_simple_stream_fps, it) }
+    return listOfNotNull("${current.width}×${current.height}", fps, tvVideoCodecName(current.mimeType))
+        .joinToString("  ·  ")
+}
+
+private class StreamVideo(val width: Int, val height: Int, val frameRate: Float, val mimeType: String?)
+
+/** Размер берётся из декодера, частота и кодек — из выбранной видеодорожки. */
+private fun videoOf(player: Player): StreamVideo {
+    val format = player.currentTracks.groups
+        .filter { it.type == C.TRACK_TYPE_VIDEO }
+        .firstNotNullOfOrNull { group ->
+            (0 until group.length).firstOrNull(group::isTrackSelected)?.let(group::getTrackFormat)
+        }
+    val size = player.videoSize
+    return StreamVideo(
+        width = size.width.takeIf { it > 0 } ?: format?.width ?: 0,
+        height = size.height.takeIf { it > 0 } ?: format?.height ?: 0,
+        frameRate = format?.frameRate ?: -1f,
+        mimeType = format?.sampleMimeType,
     )
 }
 
