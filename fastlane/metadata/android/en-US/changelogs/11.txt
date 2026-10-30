@@ -1,0 +1,5 @@
+• Smooth scrolling of channel lists, even on TV boxes with sped-up system animations.
+• A group's channels always start from the first channel.
+• Settings: the startup channel is picked from the list of all channels.
+• Channel menu: picture aspect Auto, 4:3 or 3:2, remembered for each channel.
+• Optional stream info on the channel banner: resolution, FPS and codec (off by default).
