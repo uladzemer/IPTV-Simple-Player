@@ -1,6 +1,9 @@
 package ru.iptvsimple.tv
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,6 +71,17 @@ class TvFocusLook(val grow: Float, val shape: Shape) {
 @OptIn(ExperimentalFoundationApi::class)
 internal object TvListScroll : BringIntoViewSpec {
     private const val EDGE_FRACTION = 0.2f
+
+    /**
+     * Мягкая пружина: один сдвиг длится дольше шага зажатой стрелки, поэтому
+     * следующий шаг подхватывает движение на ходу и список едет ровно. Со
+     * стандартной жёсткой пружиной список успевал доехать за пару кадров
+     * и стоял до следующего шага — получалась «лесенка» из рывков.
+     */
+    override val scrollAnimationSpec: AnimationSpec<Float> = spring(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = Spring.StiffnessMediumLow,
+    )
 
     override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
         // Строка выше списка целиком не помещается в запас — тогда запас меньше.

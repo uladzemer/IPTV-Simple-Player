@@ -1,7 +1,9 @@
 package ru.iptvsimple.tv
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -14,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
+import androidx.compose.ui.platform.createLifecycleAwareWindowRecomposer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -33,8 +37,23 @@ class MainActivity : ComponentActivity() {
         // Видео занимает весь экран, системные полосы прозрачные.
         val transparentBars = SystemBarStyle.dark(Color.TRANSPARENT)
         enableEdgeToEdge(statusBarStyle = transparentBars, navigationBarStyle = transparentBars)
-        setContent { DesignCanvas { SimpleTvTheme { SimpleTvApp() } } }
+        // Анимации интерфейса идут с нашей скоростью, а не с системной (см. [TvMotion]).
+        val recomposer = window.decorView.createLifecycleAwareWindowRecomposer(TvMotion(this), lifecycle)
+        setContent(parent = recomposer) { DesignCanvas { SimpleTvTheme { SimpleTvApp() } } }
     }
+}
+
+/**
+ * Скорость анимаций интерфейса. На приставках часто ускоряют системные
+ * анимации (на X96 стояло 0,25×), и Compose ускорял вслед за ними прокрутку
+ * списков: она успевала за пару кадров и стояла до следующего шага, строки
+ * ехали рывками. Поэтому скорость своя — обычная. Только если анимации
+ * в системе выключены совсем (0×), выключаем и свои.
+ */
+private class TvMotion(context: Context) : MotionDurationScale {
+    override val scaleFactor: Float =
+        if (Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f) 0f
+        else 1f
 }
 
 /**
