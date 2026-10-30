@@ -1,6 +1,7 @@
 package ru.iptvsimple.tv
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -9,8 +10,9 @@ import androidx.tv.material3.ColorScheme
 import androidx.tv.material3.darkColorScheme
 
 /**
- * Плоская тёмная палитра: спокойные серые поверхности без рамок и свечения.
- * Фокус — светлая заливка с тёмным текстом, выбранный элемент — тихо-синий.
+ * Тёмная палитра в духе Apple TV: панели поверх эфира — полупрозрачное
+ * «стекло», строки на нём — лёгкая белая дымка. Фокус — белая заливка
+ * с тёмным текстом, выбранный элемент — полупрозрачный синий.
  * Имена говорят, для чего цвет, а не какой он.
  */
 object TvColors {
@@ -18,15 +20,17 @@ object TvColors {
     val Backdrop = Color(0xFF111316)
     /** Поле ввода без фокуса — чуть светлее фона. */
     val FieldIdle = Color(0xFF16191D)
-    /** Подложка строк, плиток и панелей. */
+    /** Сплошная подложка: экраны без эфира под ними. */
     val Card = Color(0xFF1D2024)
+    /** Строка или плитка без фокуса: белая дымка поверх стекла и фона. */
+    val Rest = Color(0x1AFFFFFF)
     /** Подложка, поднятая над карточкой: поле ввода в фокусе, дорожка переключателя. */
     val CardRaised = Color(0xFF272A2F)
     /** Заливка элемента в фокусе пульта и текст на ней. */
-    val FocusFill = Color(0xFFE3E3E6)
+    val FocusFill = Color(0xFFFFFFFF)
     val OnFocusFill = Color(0xFF16181B)
     /** Выбранный (текущий) элемент без фокуса и текст на нём. */
-    val Chosen = Color(0xFF2A3546)
+    val Chosen = Color(0x4D78A0E6)
     val OnChosen = Color(0xFFC6DAFF)
     /** Фирменный голубой: «TV» в знаке, отметки выбора. */
     val Brand = Color(0xFFA8C7FA)
@@ -40,6 +44,22 @@ object TvColors {
     val InkFaint = Color(0xFF85898F)
     /** Полупрозрачная подложка надписей поверх видео. */
     val Veil = Color(0xE6111316)
+    /**
+     * «Стекло» панелей поверх эфира: сверху прозрачнее, снизу плотнее.
+     * Плотности хватает, чтобы серые надписи читались и поверх белого кадра.
+     */
+    val GlassTop = Color(0xD924282E)
+    val GlassBottom = Color(0xEB0E1013)
+    /** Тень под элементом в фокусе. */
+    val Shadow = Color(0xFF000000)
+}
+
+/**
+ * Заливки панелей. Настоящего размытия эфира под панелью нет: видео идёт
+ * отдельным аппаратным слоем (SurfaceView), и интерфейс не может его прочитать.
+ */
+object TvBrushes {
+    val Glass = Brush.verticalGradient(listOf(TvColors.GlassTop, TvColors.GlassBottom))
 }
 
 /** Отступы по сетке 4dp. */
@@ -79,6 +99,9 @@ object TvSizes {
     /** Логотип канала в списке и в карточке эфира. */
     val LogoSmall = 48.dp
     val LogoLarge = 72.dp
+
+    /** Высота «подъёма» элемента в фокусе: от неё зависит размер тени. */
+    val FocusLift = 18.dp
 
     /** Наименьшая высота строк разного вида: от строки плейлиста до строки настроек. */
     val RowShort = 48.dp
@@ -120,9 +143,15 @@ object TvSizes {
 
 /** Скругления углов. */
 object TvShapes {
-    val Small = RoundedCornerShape(8.dp)
-    val Medium = RoundedCornerShape(12.dp)
-    val Large = RoundedCornerShape(16.dp)
+    val Small = RoundedCornerShape(12.dp)
+    val Medium = RoundedCornerShape(16.dp)
+    val Large = RoundedCornerShape(20.dp)
+
+    /** Панель у левого края экрана: скруглены правые углы. */
+    val PanelStart = RoundedCornerShape(topEnd = 36.dp, bottomEnd = 36.dp)
+
+    /** Панель у правого края экрана: скруглены левые углы. */
+    val PanelEnd = RoundedCornerShape(topStart = 36.dp, bottomStart = 36.dp)
 }
 
 /**

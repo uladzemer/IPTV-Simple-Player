@@ -533,7 +533,8 @@ private fun SidePanel(
             modifier = Modifier
                 .width(TvSizes.SidePanel)
                 .fillMaxHeight()
-                .background(TvColors.Card)
+                .clip(TvShapes.PanelEnd)
+                .background(TvBrushes.Glass)
                 .tvSteadyRepeat()
         ) {
             item {

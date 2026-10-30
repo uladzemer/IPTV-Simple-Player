@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
@@ -123,13 +124,14 @@ internal fun TvChannelPanel(
         modifier = modifier
             .fillMaxHeight()
             .fillMaxWidth(0.72f)
-            .background(TvColors.Veil)
+            .clip(TvShapes.PanelStart)
+            .background(TvBrushes.Glass)
             .padding(TvSpacing.XLarge)
     ) {
         LazyColumn(
             state = groupListState,
             verticalArrangement = Arrangement.spacedBy(TvSpacing.Small),
-            contentPadding = PaddingValues(vertical = TvSpacing.Small, horizontal = TvSpacing.Small),
+            contentPadding = PaddingValues(vertical = TvSpacing.Small, horizontal = TvSpacing.Comfortable),
             modifier = Modifier
                 .width(TvSizes.GroupColumn)
                 .fillMaxHeight()
@@ -171,7 +173,7 @@ internal fun TvChannelPanel(
         LazyColumn(
             state = channelListState,
             verticalArrangement = Arrangement.spacedBy(TvSpacing.Small),
-            contentPadding = PaddingValues(vertical = TvSpacing.Small, horizontal = TvSpacing.Small),
+            contentPadding = PaddingValues(vertical = TvSpacing.Small, horizontal = TvSpacing.Comfortable),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()

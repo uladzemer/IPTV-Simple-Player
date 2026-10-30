@@ -45,21 +45,25 @@ import androidx.compose.ui.zIndex
 
 /**
  * Как элемент выглядит, когда на нём фокус пульта: во сколько раз он
- * подрастает и какой формы его подложка.
+ * подрастает («приподнимается» над соседями, под ним появляется тень),
+ * какой формы его подложка и какого цвета она без фокуса.
  */
 @Immutable
-class TvFocusLook(val grow: Float, val shape: Shape) {
+class TvFocusLook(val grow: Float, val shape: Shape, val rest: Color) {
     companion object {
-        /** Отдельная плитка: заметно подрастает. */
-        val Tile = TvFocusLook(grow = 1.04f, shape = TvShapes.Small)
+        /** Отдельная плитка: поднимается сильнее всего. */
+        val Tile = TvFocusLook(grow = 1.08f, shape = TvShapes.Large, rest = TvColors.Rest)
 
-        /** Строка длинного списка: растёт чуть-чуть, чтобы не задевать соседей. */
-        val ListRow = TvFocusLook(grow = 1.02f, shape = TvShapes.Medium)
+        /** Строка длинного списка: заметный подъём, соседи слегка перекрываются. */
+        val ListRow = TvFocusLook(grow = 1.06f, shape = TvShapes.Large, rest = TvColors.Rest)
 
-        /** Строка меню или боковой панели: не растёт, только светлеет. */
-        val MenuRow = TvFocusLook(grow = 1f, shape = TvShapes.Medium)
+        /** Строка меню или боковой панели: без фокуса прозрачна, в фокусе чуть поднимается. */
+        val MenuRow = TvFocusLook(grow = 1.04f, shape = TvShapes.Medium, rest = Color.Transparent)
     }
 }
+
+/** Подъём в фокусе — с лёгкой пружиной: элемент чуть «проскакивает» и встаёт на место. */
+private val FocusGrowSpring = spring<Float>(dampingRatio = 0.7f, stiffness = Spring.StiffnessMediumLow)
 
 /**
  * Как список прокручивается за фокусом пульта. Системный вариант для ТВ
@@ -155,13 +159,14 @@ fun TvPressable(
     var focused by remember { mutableStateOf(false) }
     val grow by animateFloatAsState(
         targetValue = if (focused && available) look.grow else 1f,
+        animationSpec = FocusGrowSpring,
         label = "tv-pressable-grow",
     )
     val fill = when {
-        !available -> TvColors.Card
+        !available -> look.rest
         focused -> TvColors.FocusFill
         tinted -> TvColors.Chosen
-        else -> TvColors.Card
+        else -> look.rest
     }
 
     Box(
@@ -171,6 +176,11 @@ fun TvPressable(
             .graphicsLayer {
                 scaleX = grow
                 scaleY = grow
+                // Тень растёт вместе с подъёмом и пропадает, когда элемент опустился.
+                val lift = if (look.grow > 1f) ((grow - 1f) / (look.grow - 1f)).coerceIn(0f, 1f) else 0f
+                shadowElevation = TvSizes.FocusLift.toPx() * lift
+                ambientShadowColor = TvColors.Shadow
+                spotShadowColor = TvColors.Shadow
                 shape = look.shape
                 clip = true
             }

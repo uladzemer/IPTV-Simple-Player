@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
@@ -61,7 +62,8 @@ internal fun TvChannelMenu(
         modifier = modifier
             .fillMaxHeight()
             .width(TvSizes.ChannelMenu)
-            .background(TvColors.Card)
+            .clip(TvShapes.PanelEnd)
+            .background(TvBrushes.Glass)
             .padding(horizontal = TvSpacing.Large, vertical = TvSpacing.XLarge)
     ) {
         Text(

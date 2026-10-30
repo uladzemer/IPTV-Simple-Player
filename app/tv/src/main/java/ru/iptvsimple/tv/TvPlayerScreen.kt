@@ -5,6 +5,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -110,6 +113,12 @@ fun TvPlayerScreen(
 
     var panelVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
+    // Счётчики открытий: панель, открытая снова, пока прежняя ещё уезжает,
+    // строится заново и сама берёт фокус.
+    var panelOpens by remember { mutableIntStateOf(0) }
+    var menuOpens by remember { mutableIntStateOf(0) }
+    LaunchedEffect(panelVisible) { if (panelVisible) panelOpens++ }
+    LaunchedEffect(menuVisible) { if (menuVisible) menuOpens++ }
     var infoToken by remember { mutableIntStateOf(0) }
     var infoVisible by remember { mutableStateOf(true) }
     var message by remember { mutableStateOf<String?>(null) }
@@ -324,49 +333,63 @@ fun TvPlayerScreen(
             )
         }
 
-        if (panelVisible) {
-            TvChannelPanel(
-                playlists = playlists,
-                panelPlaylistUrl = panelPlaylistUrl,
-                channels = panelChannels,
-                favorites = favorites,
-                queue = queue,
-                numbering = numbering,
-                currentChannelId = displayed?.id,
-                onPlay = { target, group ->
-                    panelVisible = false
-                    onPlayFromPanel(target, group)
-                },
-                onSelectPlaylist = onSelectPanelPlaylist,
-                modifier = Modifier.align(Alignment.CenterStart)
-            )
+        // Панели выезжают с края экрана и уезжают обратно.
+        AnimatedVisibility(
+            visible = panelVisible,
+            enter = slideInHorizontally { -it / 4 } + fadeIn(),
+            exit = slideOutHorizontally { -it / 4 } + fadeOut(),
+            modifier = Modifier.align(Alignment.CenterStart),
+        ) {
+            key(panelOpens) {
+                TvChannelPanel(
+                    playlists = playlists,
+                    panelPlaylistUrl = panelPlaylistUrl,
+                    channels = panelChannels,
+                    favorites = favorites,
+                    queue = queue,
+                    numbering = numbering,
+                    currentChannelId = displayed?.id,
+                    onPlay = { target, group ->
+                        panelVisible = false
+                        onPlayFromPanel(target, group)
+                    },
+                    onSelectPlaylist = onSelectPanelPlaylist,
+                )
+            }
         }
 
-        if (menuVisible && displayed != null) {
-            TvChannelMenu(
-                channel = displayed,
-                number = displayedNumber,
-                favorite = displayed.id in favoriteIds,
-                aspect = channelAspects[displayed.id] ?: ChannelAspect.AUTO,
-                onCycleAspect = onCycleAspect,
-                onToggleFavorite = {
-                    menuVisible = false
-                    onToggleFavorite()?.let { added ->
-                        showMessage(if (added) favoriteAdded else favoriteRemoved)
-                    }
-                },
-                onRestart = {
-                    menuVisible = false
-                    onRestart()
-                },
-                onOpenChannels = {
-                    menuVisible = false
-                    onOpenPanel()
-                    panelVisible = true
-                },
-                onClose = { menuVisible = false },
-                modifier = Modifier.align(Alignment.CenterEnd)
-            )
+        AnimatedVisibility(
+            visible = menuVisible && displayed != null,
+            enter = slideInHorizontally { it / 4 } + fadeIn(),
+            exit = slideOutHorizontally { it / 4 } + fadeOut(),
+            modifier = Modifier.align(Alignment.CenterEnd),
+        ) {
+            key(menuOpens) {
+                val menuChannel = displayed ?: return@AnimatedVisibility
+                TvChannelMenu(
+                    channel = menuChannel,
+                    number = displayedNumber,
+                    favorite = menuChannel.id in favoriteIds,
+                    aspect = channelAspects[menuChannel.id] ?: ChannelAspect.AUTO,
+                    onCycleAspect = onCycleAspect,
+                    onToggleFavorite = {
+                        menuVisible = false
+                        onToggleFavorite()?.let { added ->
+                            showMessage(if (added) favoriteAdded else favoriteRemoved)
+                        }
+                    },
+                    onRestart = {
+                        menuVisible = false
+                        onRestart()
+                    },
+                    onOpenChannels = {
+                        menuVisible = false
+                        onOpenPanel()
+                        panelVisible = true
+                    },
+                    onClose = { menuVisible = false },
+                )
+            }
         }
     }
 }
@@ -383,7 +406,7 @@ private fun ChannelBanner(
         verticalArrangement = Arrangement.spacedBy(TvSpacing.Medium),
         modifier = Modifier
             .fillMaxWidth()
-            .background(TvColors.Veil)
+            .background(TvBrushes.Glass)
             .padding(horizontal = TvSpacing.XXLarge, vertical = TvSpacing.Large)
     ) {
         Row(
